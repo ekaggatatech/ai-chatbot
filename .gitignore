@@ -1,0 +1,28 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+
+# Environment Variables
+.env
+.ENV
+*.env
+
+# React
+frontend/node_modules/
+frontend/dist/
+
+# Chroma Database
+embedding/chroma_db/
+
+backend/embedding/chroma_db/
+
+# VS Code
+.vscode/
+
+# Logs
+*.log
+
+# Operating System
+.DS_Store
+Thumbs.db

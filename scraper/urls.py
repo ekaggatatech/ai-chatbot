@@ -1,0 +1,29 @@
+BASE_URL="https://hour-maker-vite.vercel.app/"
+URLS=[
+    #Main
+    f"{BASE_URL}/",
+    f"{BASE_URL}/pricing",
+    f"{BASE_URL}/resources",
+    
+    #Comapany
+    f"{BASE_URL}/company",
+    f"{BASE_URL}/company#contact",
+    f"{BASE_URL}/privacy-policy",
+    f"{BASE_URL}/terms",
+
+    #Features
+    f"{BASE_URL}/features/automatic-tracking",
+    f"{BASE_URL}/features/manual-tracking",
+    f"{BASE_URL}/features/attendance",
+    f"{BASE_URL}/features/onboarding",
+    f"{BASE_URL}/features/holiday",
+    f"{BASE_URL}/features/meeting-scheduling",
+    f"{BASE_URL}/features/docs-portal",
+    f"{BASE_URL}/features/user-management",
+    f"{BASE_URL}/features/access-management",
+    f"{BASE_URL}/features/analytics",
+    f"{BASE_URL}/features/projects",
+    f"{BASE_URL}/features/billing",
+    f"{BASE_URL}/features/client-management",
+    f"{BASE_URL}/features/invoicing",
+]
