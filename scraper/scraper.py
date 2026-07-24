@@ -1,90 +1,83 @@
-import asyncio
-from playwright.async_api import async_playwright
-from bs4 import BeautifulSoup
-import json
 import os
+import asyncio
+from urllib.parse import urlparse
 
-from .urls import BASE_URL, URLS
-
-
-# -----------------------------
-# Scrape a single page
-# -----------------------------
-async def scrape_page(page, url):
-    print(f"Scraping: {url}")
-
-    await page.goto(url, wait_until="domcontentloaded", timeout=60000)
-    await page.wait_for_timeout(2000)
-
-    content = await page.content()
-
-    soup = BeautifulSoup(content, "html.parser")
-
-    # Remove unwanted HTML tags
-    for tag in soup(["script", "style", "nav", "header", "footer", "aside"]):
-        tag.decompose()
-
-    # Try to extract only the main content
-    main = soup.find("main")
-
-    if main:
-        soup = main
-
-    text = soup.get_text(separator="\n", strip=True)
-
-    return {
-        "url": url,
-        "content": text
-    }
+from playwright.async_api import async_playwright
+from .urls import URLS
 
 
-# -----------------------------
-# Remove duplicate paragraphs
-# across all pages
-# -----------------------------
-def remove_global_duplicates(all_data):
+SAVE_DIR = "scraper/output/html"
 
-    seen = set()
+REMOVE_HIDDEN_JS = """
+() => {
+    const isHidden = (el) => {
+        const style = window.getComputedStyle(el);
+        if (style.display === 'none') return true;
+        if (style.visibility === 'hidden') return true;
+        if (parseFloat(style.opacity) === 0) return true;
+        if (el.hasAttribute('hidden')) return true;
+        if (el.getAttribute('aria-hidden') === 'true') return true;
 
-    cleaned_pages = []
+        const rect = el.getBoundingClientRect();
+        if (rect.width === 0 && rect.height === 0) return true;
 
-    for page in all_data:
+        return false;
+    };
 
-        paragraphs = page["content"].split("\n")
+    const all = Array.from(document.querySelectorAll('body *'));
+    all.forEach(el => {
+        if (document.body.contains(el) && isHidden(el)) {
+            el.remove();
+        }
+    });
 
-        unique = []
-
-        for paragraph in paragraphs:
-
-            paragraph = paragraph.strip()
-
-            # Skip empty paragraphs
-            if len(paragraph) < 10:
-                continue
-
-            # Skip duplicate paragraphs
-            if paragraph in seen:
-                continue
-
-            seen.add(paragraph)
-
-            unique.append(paragraph)
-
-        page["content"] = "\n".join(unique)
-
-        cleaned_pages.append(page)
-
-    return cleaned_pages
+    return document.body.innerHTML;
+}
+"""
 
 
-# -----------------------------
-# Main function
-# -----------------------------
+
+def filename_from_url(url):
+    """
+    Convert URL into filename.
+    """
+
+    path = urlparse(url).path.strip("/")
+
+    if path == "":
+        return "home.html"
+
+    return path.replace("/", "_") + ".html"
+
+
+async def save_html(page, url):
+
+    print(f"Scraping {url}")
+
+    await page.goto(
+        url,
+        wait_until="networkidle",
+        timeout=60000
+    )
+
+    # wait for React page
+    await page.wait_for_timeout(3000)
+
+    html = await page.evaluate(REMOVE_HIDDEN_JS)
+
+    filename = filename_from_url(url)
+
+    filepath = os.path.join(SAVE_DIR, filename)
+
+    with open(filepath, "w", encoding="utf-8") as f:
+        f.write(html)
+
+    print(f"Saved -> {filename}")
+
+
 async def main():
 
-    print(f"Starting scraper with {len(URLS)} URLs")
-
-    all_data = []
+    os.makedirs(SAVE_DIR, exist_ok=True)
 
     async with async_playwright() as p:
 
@@ -93,37 +86,15 @@ async def main():
         page = await browser.new_page()
 
         for url in URLS:
-
             try:
-
-                data = await scrape_page(page, url)
-
-                # Skip pages with almost no content
-                if len(data["content"]) > 100:
-                    all_data.append(data)
-                else:
-                    print(f"Skipped {url} (Too little content)")
-
+                await save_html(page, url)
             except Exception as e:
-
-                print(f"Failed {url}: {e}")
+                print(f"Failed : {url}")
+                print(e)
 
         await browser.close()
 
-    # Remove duplicate paragraphs across pages
-    all_data = remove_global_duplicates(all_data)
-
-    # Create output folder
-    os.makedirs("scraper/output", exist_ok=True)
-
-    output_path = "scraper/output/website_content.json"
-
-    with open(output_path, "w", encoding="utf-8") as f:
-
-        json.dump(all_data, f, ensure_ascii=False, indent=2)
-
-    print(f"\nTotal pages scraped : {len(all_data)}")
-    print(f"File saved : {output_path}")
+    print("\nFinished scraping all pages.")
 
 
 if __name__ == "__main__":

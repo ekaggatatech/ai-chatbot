@@ -14,6 +14,8 @@ def get_gemini_answer(question: str, context: str):
     try:
         prompt = f"""
 You are the Hourmaker AI Assistant.
+Answer using the context that is provide to you.
+and If you don't find the answer then say "Sorry, I don't have this information right now ."
 Answer using Markdown.
 
 Rules:
@@ -36,13 +38,14 @@ Instructions:
 - If the question is unrelated to Hourmaker and isn't casual conversation, politely explain that you can help with Hourmaker-related questions.
 - Format answers in Markdown using headings and bullet points where appropriate.
 Answer:"""
-        
+        #Ask the Gemini to generate the answer
         response = client.models.generate_content(
             model=LLM_MODEL,
             contents=prompt
         )
         return response.text
     except Exception as e:
+      #If Gemini crashes , print the error details 
       import traceback
       traceback.print_exc()
       print("\nGemini Error:", e)
@@ -59,9 +62,9 @@ def run_chatbot(question: str):
     # Format context and extract sources properly
     context = "\n\n".join([f"[{i+1}] {c['content']}" for i, c in enumerate(chunks)])
     sources = [c.get('metadata', {}).get('url', f"Document {i+1}") for i, c in enumerate(chunks)]
-    
+    # Send the question and collected text to Gemini to get the AI response
     ai_answer = get_gemini_answer(question, context)
-    
+    #Use the Gemini answer if it worked , otherwise fallback and show raw text
     if ai_answer:
         answer = ai_answer
     else:

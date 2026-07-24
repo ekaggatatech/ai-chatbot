@@ -53,7 +53,7 @@ function App() {
 
     setInput("");
     setLoading(true);
-
+  //  connect with backend
     try {
       const response = await axios.post(
         "http://localhost:8000/chat",
@@ -121,9 +121,11 @@ function App() {
             ))}
 
             {loading && (
-              <p className="loading">
-                Bot is typing...
-              </p>
+              <div className="bot-typing">
+              <span></span>
+              <span></span>
+              <span></span>
+              </div>
             )}
 
             {/* Auto Scroll Target */}
