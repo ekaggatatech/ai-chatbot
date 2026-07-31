@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from.chatbot import run_chatbot
 from fastapi.middleware.cors import CORSMiddleware
+# from.model import ContactForm
 
 app=FastAPI()
 
@@ -23,4 +24,3 @@ def chat(data:Message):
  response=run_chatbot(data.message)
  return {"answer": response["answer"]}
  
-

@@ -16,14 +16,7 @@ def get_gemini_answer(question: str, context: str):
 You are the Hourmaker AI Assistant.
 Answer using the context that is provide to you.
 and If you don't find the answer then say "Sorry, I don't have this information right now ."
-Answer using Markdown.
-
-Rules:
-- Use headings.
-- Use bullet points.
-- Keep paragraphs short.
-- Bold important words.
-- Never return one huge paragraph.
+And if user ask the question which is not related to the Hourmaker website then simply say "Sorry, I can't help you with this."
 Context:
 {context}
 
