@@ -62,11 +62,12 @@ h1 {
   opacity: 1;
 }
 .chatbot-window {
-  position:fixed;
+  position:absolute;
   right:20px;
   bottom:90px;
   width:390px;
-  height:500px;
+  height:70vh;
+  max-height: 600px;
   background:#fff;
   border-radius:20px;
   overflow:hidden;
@@ -87,6 +88,7 @@ h1 {
   display:flex;
   justify-content: space-between;
   align-items: center;
+  flex-shrink:0;
 }
 .support-form{
   display: flex;
@@ -247,17 +249,16 @@ h1 {
   display: flex;
 }
 
-
-
 .chat-body {
-  flex: 1;
+  flex: 1 1 auto;
   padding: 16px;
   overflow-y: auto;
   display: flex;
   background: #f9fafb;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
   scroll-behavior: smooth;
+  min-height: 0;
 }
 .bot-avatar-circle{
   background: #dbeafe;
@@ -282,13 +283,13 @@ h1 {
 }
 .message-bubble{
   max-width:75%;
-  padding:14px 16px;
+  padding:10px 14px;
   border-radius:16px;
   font-size:14px;
   line-height:1.6;
   word-break:break-word;
   overflow-wrap:break-word;
-  white-space:normal;
+  white-space:pre-wrap;
 }
 .message-bubble.bot{
   background: #fff;
@@ -298,23 +299,23 @@ h1 {
   box-shadow: 0 2px 8px rgba(0,0,0,0.06);
 }  
 .message-bubble.bot h3{
-  margin :0 0 10px;
+  margin :0 0 6px;
   font-size: 16px;
   font-weight: 600;
   color:#111827;
 }
 .message-bubble.bot p{
-  margin:0 0 10px;
-  line-height: 1.7;
+  margin:4px 0;
+  line-height: 1.5;
 }
 .message-bubble.bot ul{
-  margin:8px 0;
-  padding-left:22px;
+  margin:6px 0;
+  padding-left:20px;
 }
 
 .message-bubble.bot li{
-  margin:6px 0;
-  line-height:1.6;
+  margin:4px 0;
+  line-height:1.5;
 }
 
 .message-bubble.user{
@@ -367,17 +368,20 @@ h1 {
   gap: 8px;
   padding:12px;
   border-top:1px solid #e5e7eb;
-  background:#fff
+  background:#fff;
+  align-items: flex-end;
+  flex-shrink: 0;
 }
 
-.chat-input input {
+.chat-input textarea {
   flex: 1;
   padding: 12px 16px;
   border: 1px solid #2563eb;
   border-radius: 24px;
   font-size:14px;
+  overflow-y:auto;
+  resize:none;
 }
-
 .chat-input button {
   width:44px;
   height:44px;

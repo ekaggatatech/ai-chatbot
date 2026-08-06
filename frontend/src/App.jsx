@@ -16,7 +16,7 @@ function App() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [showMenu,setShowMenu]=useState(false);
-
+  const [sessionId,setSessionId]=useState(null);  //for session memory
   // contact form
   const[showSupportForm,setShowSupportForm]=useState(false);
   const[supportForm,setSupportForm]=useState({
@@ -29,6 +29,7 @@ function App() {
   const [errors,setErrors]=useState({});
 
   const formRef=useRef(null);
+  const inputRef=useRef(null); //for auto focus
 
   const validateForm=()=>{
     let newErrors={};
@@ -153,6 +154,22 @@ useEffect(()=>{
   document.addEventListener("mousedown",handleCLickOutside);
   },[]);
 
+  // for network issue alert
+  useEffect(()=>{
+    const handleOffline=()=>{
+      setMessages((prev)=>[
+        ...prev,
+        { 
+          text:"Internet connection lost.check your internet connection",
+          sender:"bot",
+        },
+      ]);
+    };
+     window.addEventListener("offline",handleOffline);
+  return () => {
+    window.removeEventListener("offline", handleOffline);
+  };
+  },[]);
 
   const toggleChat=()=>{
     setIsOpen(!isOpen);
@@ -255,8 +272,11 @@ useEffect(()=>{
         "http://localhost:8000/chat",
         {
           message: userMessage,
+          session_id:sessionId
         }
       );
+      // Save session id from backend
+      setSessionId(response.data.session_id);
 
       // Add bot response
       setMessages((prev) => [
@@ -311,6 +331,16 @@ useEffect(()=>{
     window.URL.revokeObjectURL(url);
     setShowMenu(false);
 
+  };
+
+  // Shift+enter while typing 
+  const handleKeyDown=(e)=>{
+    if(e.key==='Enter'&&!e.shiftKey){
+      e.preventDefault();//stop new line
+      if(!loading && input.trim()!==""){
+        sendMessage();
+      }
+    }
   };
 
   return (
@@ -368,7 +398,7 @@ useEffect(()=>{
             </div>  
             )}
             <div className={`message-bubble ${msg.sender}`}>
-             <ReactMarkdown>{msg.text}</ReactMarkdown>
+             <ReactMarkdown>{msg.text.trim()}</ReactMarkdown>
             </div>
 
             {msg.sender==="user"&&(
@@ -463,18 +493,15 @@ useEffect(()=>{
             <div ref={messagesEndRef}></div>
           </div>
 
-          {/* Chat Input */}
+          {/* Chat Input and input to textarea for multiline */}
           <div className="chat-input">
-            <input
-              type="text"
-              value={input}
-              placeholder="Type a message..."
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !loading) {
-                  sendMessage();
-                }
-              }}
+            <textarea ref={inputRef}
+             value={input}
+             placeholder="Type a message..."
+             onChange={(e)=>setInput(e.target.value)}
+             onKeyDown={handleKeyDown}
+             rows={1}
+              
             />
 
             <button
